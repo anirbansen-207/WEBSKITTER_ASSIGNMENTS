@@ -192,8 +192,8 @@ const CreateOfflineBooking = () => {
                 .filter((trip) => trip.tripStatus === "SCHEDULED")
                 .map((trip) => (
                   <MenuItem key={trip._id} value={trip._id}>
-                    {/* ID is NOT displayed */}
-                    {new Date(trip.travelDate).toLocaleDateString()}
+                    {trip.routeId?.sourceCity} → {trip.routeId?.destinationCity}{" "}
+                    — {new Date(trip.travelDate).toLocaleDateString()}
                   </MenuItem>
                 ))}
             </Select>

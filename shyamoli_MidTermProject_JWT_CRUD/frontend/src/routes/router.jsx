@@ -56,6 +56,10 @@ import CustomerDetails from "../pages/superAdmin/CustomerDetails";
 import Bookings from "../pages/superAdmin/Bookings";
 import BookingDetails from "../pages/superAdmin/BookingDetails";
 import CreateOfflineBooking from "../pages/bookingStaff/CreateOfflineBooking";
+import BookingsDetails from "../pages/bookingStaff/BookingsDetails";
+import PrintTicket from "../pages/bookingStaff/PrintTicket";
+
+
 
 const router = createBrowserRouter([
   // Public routes
@@ -152,6 +156,14 @@ const router = createBrowserRouter([
               {
                 path: "create-booking",
                 element: <CreateOfflineBooking />,
+              },
+              {
+                path: "bookings",
+                element: <BookingsDetails />,
+              },
+              {
+                path: "print-ticket",
+                element: <PrintTicket />,
               },
             ],
           },

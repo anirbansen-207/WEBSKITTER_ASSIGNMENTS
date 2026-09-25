@@ -1,5 +1,12 @@
 import { Outlet, useNavigate } from "react-router-dom";
-import { Box, Button, List, ListItemButton, ListItemText } from "@mui/material";
+
+import {
+  Box,
+  Button,
+  List,
+  ListItemButton,
+  ListItemText,
+} from "@mui/material";
 
 import { useAuth } from "../context/AuthContext";
 
@@ -18,6 +25,10 @@ const BookingStaffLayout = () => {
       label: "Create Booking",
       path: "/booking-staff/create-booking",
     },
+    {
+      label: "Bookings",
+      path: "/booking-staff/bookings",
+    },
   ];
 
   // Logout
@@ -27,8 +38,12 @@ const BookingStaffLayout = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
-
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+      }}
+    >
       {/* Sidebar */}
       <Box
         sx={{
@@ -37,21 +52,26 @@ const BookingStaffLayout = () => {
           p: 2,
         }}
       >
+        {/* Logo */}
         <Box sx={{ mb: 3 }}>
           <strong>Shamolly</strong>
         </Box>
 
+        {/* Navigation */}
         <List>
           {menuItems.map((item) => (
             <ListItemButton
               key={item.path}
               onClick={() => navigate(item.path)}
             >
-              <ListItemText primary={item.label} />
+              <ListItemText
+                primary={item.label}
+              />
             </ListItemButton>
           ))}
         </List>
 
+        {/* Logout */}
         <Box sx={{ mt: 3 }}>
           <Button
             fullWidth
@@ -63,10 +83,8 @@ const BookingStaffLayout = () => {
         </Box>
       </Box>
 
-
       {/* Main content */}
       <Box sx={{ flex: 1 }}>
-
         {/* Top bar */}
         <Box
           sx={{
@@ -83,14 +101,11 @@ const BookingStaffLayout = () => {
           </Box>
         </Box>
 
-
         {/* Page content */}
         <Box sx={{ p: 2 }}>
           <Outlet />
         </Box>
-
       </Box>
-
     </Box>
   );
 };

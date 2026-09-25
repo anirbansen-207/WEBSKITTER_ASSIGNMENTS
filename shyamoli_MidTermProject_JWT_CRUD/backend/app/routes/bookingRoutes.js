@@ -65,6 +65,7 @@ router.patch(
   authMiddleware,
   roleMiddleware([
     ROLES.CUSTOMER,
+    ROLES.BOOKING_STAFF,
   ]),
   cancelBookingController
 );
@@ -76,6 +77,7 @@ router.get(
   authMiddleware,
   roleMiddleware([
     ROLES.CUSTOMER,
+    ROLES.BOOKING_STAFF,
   ]),
   getAvailableSeatsController
 );

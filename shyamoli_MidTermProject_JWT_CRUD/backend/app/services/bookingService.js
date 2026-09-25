@@ -262,73 +262,79 @@ export const getSingleBookingService = async (
 
 
 // CANCEL BOOKING
+// Cancel booking service
 export const cancelBookingService = async ({
   bookingId,
   customerId,
 }) => {
   try {
-    const booking = await Booking.findOne({
+    // Build the booking search condition
+    const bookingQuery = {
       _id: bookingId,
-      customerId,
-    });
+    };
 
+    // If customerId is provided,
+    // it means a customer is cancelling their own booking.
+    //
+    // If customerId is undefined,
+    // it means Booking Staff is cancelling
+    // the booking on behalf of the customer.
+    if (customerId) {
+      bookingQuery.customerId = customerId;
+    }
+
+    // Find the booking
+    const booking = await Booking.findOne(
+      bookingQuery,
+    );
+
+    // Booking not found
     if (!booking) {
-      const error = new Error("Booking not found");
+      const error = new Error(
+        "Booking not found",
+      );
 
       error.statusCode = 404;
+
       throw error;
     }
 
+    // Check whether booking is already cancelled
     if (booking.status === "CANCELLED") {
       const error = new Error(
         "Booking is already cancelled",
       );
 
       error.statusCode = 400;
+
       throw error;
     }
 
-    const trip = await Trip.findById(
-      booking.tripId,
-    );
-
-    if (!trip) {
-      const error = new Error("Trip not found");
-
-      error.statusCode = 404;
-      throw error;
-    }
-
-    if (
-      trip.tripStatus === "ONGOING" ||
-      trip.tripStatus === "COMPLETED" ||
-      trip.tripStatus === "CANCELLED"
-    ) {
+    // Check whether booking is confirmed
+    if (booking.status !== "CONFIRMED") {
       const error = new Error(
-        "Booking cannot be cancelled at this stage",
+        "Only confirmed bookings can be cancelled",
       );
 
       error.statusCode = 400;
+
       throw error;
     }
 
+    // Update booking status
     booking.status = "CANCELLED";
 
+    // Save booking
     await booking.save();
 
-    // Cancel active ticket
-    await Ticket.findOneAndUpdate(
-      {
-        bookingId: booking._id,
-        ticketStatus: "ACTIVE",
-      },
-      {
-        ticketStatus: "CANCELLED",
-      },
-    );
-
+    // Return updated booking
     return booking;
   } catch (error) {
+    console.error(
+      "Error cancelling booking:",
+      error,
+    );
+
     throw error;
   }
 };

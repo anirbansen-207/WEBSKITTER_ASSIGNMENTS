@@ -1,6 +1,9 @@
 import express from "express";
 
-import { createTicketController } from "../controllers/ticketGenerationController.js";
+import {
+  createTicketController,
+  createStaffTicketController,
+} from "../controllers/ticketGenerationController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { roleMiddleware } from "../middlewares/roleMiddleware.js";
 import { validateMiddleware } from "../middlewares/validationMiddleware.js";
@@ -15,7 +18,16 @@ router.post(
   authMiddleware,
   roleMiddleware([ROLES.CUSTOMER]),
   validateMiddleware(createTicketSchema),
-  createTicketController
+  createTicketController,
+);
+
+// Booking Staff ticket
+router.post(
+  "/create_staff_ticket",
+  authMiddleware,
+  roleMiddleware([ROLES.BOOKING_STAFF]),
+  validateMiddleware(createTicketSchema),
+  createStaffTicketController,
 );
 
 export default router;

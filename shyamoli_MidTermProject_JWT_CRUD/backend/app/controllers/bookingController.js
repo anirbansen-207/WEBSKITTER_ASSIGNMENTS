@@ -112,22 +112,32 @@ export const getSingleBookingController = async (req, res, next) => {
 
 
 // Cancel booking
+// Cancel booking controller
 export const cancelBookingController = async (req, res, next) => {
   try {
     const { bookingId } = req.params;
 
-    const customerId = req.user.userId;
+    // Get logged-in user's ID and role
+    const { userId, role } = req.user;
 
-    const cancelledBooking = await cancelBookingService({
-      bookingId,
-      customerId,
-    });
+    // Customer cancels their own booking.
+    // Booking Staff can cancel any customer's booking.
+    const customerId =
+      role === ROLES.CUSTOMER
+        ? userId
+        : undefined;
+
+    const cancelledBooking =
+      await cancelBookingService({
+        bookingId,
+        customerId,
+      });
 
     return successResponse(
       res,
       200,
       "Booking cancelled successfully",
-      cancelledBooking
+      cancelledBooking,
     );
   } catch (error) {
     next(error);

@@ -39,3 +39,15 @@ export const createOfflineBooking = async (bookingData) => {
 
   return response.data.data;
 };
+
+// Generate ticket for offline booking
+export const createStaffTicket = async (bookingId) => {
+  const response = await axiosInstance.post(
+    "/api/ticket/create_staff_ticket",
+    {
+      bookingId,
+    }
+  );
+
+  return response.data.data;
+};
