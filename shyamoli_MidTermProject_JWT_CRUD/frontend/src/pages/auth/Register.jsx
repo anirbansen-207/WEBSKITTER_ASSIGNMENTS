@@ -1,114 +1,423 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Divider,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
+
+import {
+  Person,
+  EmailOutlined,
+  LockOutlined,
+  PhoneOutlined,
+  Visibility,
+  VisibilityOff,
+  ArrowBack,
+} from "@mui/icons-material";
+
 import { registerCustomer } from "../../services/authService";
 
 const Register = () => {
-  // Used to navigate to the OTP verification page later.
   const navigate = useNavigate();
 
-  // Stores registration form values.
+  // ================= FORM DATA =================
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
   });
 
-  // Used to show loading state on the button.
+  // ================= STATES =================
+
+  const [showPassword, setShowPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
 
-  // Handles changes in the input fields.
+  const [error, setError] = useState("");
+
+  // ================= HANDLE INPUT =================
+
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-    setFormData((previousData) => ({
-      ...previousData,
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
     }));
   };
 
-  // Handles registration form submission.
+  // ================= REGISTER =================
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    setError("");
+
+    // Basic frontend validation
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.phone.trim() ||
+      !formData.password.trim()
+    ) {
+      setError("Please fill in all fields.");
+      return;
+    }
 
     try {
       setLoading(true);
 
-      // Send registration data to the backend.
-      const response = await registerCustomer(formData);
+      // Register customer
+      await registerCustomer(formData);
 
-      console.log("Registration successful:", response);
-
-      /*
-        Backend sends an OTP after registration.
-
-        Later we will create VerifyOtp.jsx
-        and navigate the user there.
-      */
+      // After successful registration,
+      // go to OTP verification page
       navigate("/verify-otp", {
         state: {
           email: formData.email,
         },
       });
     } catch (error) {
-      console.error("Registration failed:", error);
+      setError(
+        error?.response?.data?.message ||
+          "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>Create Customer Account</h1>
+    <Box
+      sx={{
+        minHeight: "calc(100vh - 82px)",
 
-      <form onSubmit={handleSubmit}>
-        {/* Name */}
-        <div>
-          <label>Name</label>
+        background:
+          "linear-gradient(135deg, #f5f7fb 0%, #e9eef7 100%)",
 
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Enter your name"
-            required
-          />
-        </div>
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
 
-        {/* Email */}
-        <div>
-          <label>Email</label>
+        py: 6,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Card
+          elevation={8}
+          sx={{
+            borderRadius: 4,
+            overflow: "hidden",
+          }}
+        >
+          {/* ================================================= */}
+          {/* TOP SECTION */}
+          {/* ================================================= */}
 
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter your email"
-            required
-          />
-        </div>
+          <Box
+            sx={{
+              backgroundColor: "#07152f",
+              color: "white",
 
-        {/* Password */}
-        <div>
-          <label>Password</label>
+              textAlign: "center",
 
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Create a password"
-            required
-          />
-        </div>
+              px: 3,
+              py: 4,
+            }}
+          >
+            {/* Person Icon */}
 
-        {/* Register button */}
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating Account..." : "Register"}
-        </button>
-      </form>
-    </div>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+
+                borderRadius: "50%",
+
+                backgroundColor: "#263653",
+
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+
+                mx: "auto",
+                mb: 2,
+              }}
+            >
+              <Person
+                sx={{
+                  fontSize: 34,
+                }}
+              />
+            </Box>
+
+            {/* Heading */}
+
+            <Typography
+              variant="h4"
+              fontWeight={700}
+            >
+              Create Account
+            </Typography>
+
+            {/* Subtitle */}
+
+            <Typography
+              sx={{
+                mt: 1,
+                color: "#b8c2d6",
+              }}
+            >
+              Create your Shamolly Bus Service account
+            </Typography>
+          </Box>
+
+          {/* ================================================= */}
+          {/* FORM SECTION */}
+          {/* ================================================= */}
+
+          <CardContent
+            sx={{
+              p: {
+                xs: 3,
+                md: 4,
+              },
+            }}
+          >
+            {/* Error */}
+
+            {error && (
+              <Alert
+                severity="error"
+                sx={{
+                  mb: 3,
+                }}
+              >
+                {error}
+              </Alert>
+            )}
+
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
+            >
+              {/* ================================================= */}
+              {/* NAME */}
+              {/* ================================================= */}
+
+              <TextField
+                fullWidth
+                label="Full Name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                margin="normal"
+                placeholder="Enter your full name"
+                autoComplete="name"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Person />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {/* ================================================= */}
+              {/* EMAIL */}
+              {/* ================================================= */}
+
+              <TextField
+                fullWidth
+                label="Email Address"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                margin="normal"
+                placeholder="Enter your email"
+                autoComplete="email"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailOutlined />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {/* ================================================= */}
+              {/* PHONE */}
+              {/* ================================================= */}
+
+              <TextField
+                fullWidth
+                label="Phone Number"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                margin="normal"
+                placeholder="Enter your phone number"
+                autoComplete="tel"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PhoneOutlined />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {/* ================================================= */}
+              {/* PASSWORD */}
+              {/* ================================================= */}
+
+              <TextField
+                fullWidth
+                label="Password"
+                name="password"
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
+                value={formData.password}
+                onChange={handleChange}
+                margin="normal"
+                placeholder="Create a password"
+                autoComplete="new-password"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockOutlined />
+                    </InputAdornment>
+                  ),
+
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() =>
+                          setShowPassword(
+                            (previous) =>
+                              !previous
+                          )
+                        }
+                        edge="end"
+                      >
+                        {showPassword ? (
+                          <VisibilityOff />
+                        ) : (
+                          <Visibility />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {/* ================================================= */}
+              {/* REGISTER BUTTON */}
+              {/* ================================================= */}
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={loading}
+                sx={{
+                  mt: 3,
+                  py: 1.5,
+
+                  borderRadius: 2,
+
+                  backgroundColor: "#07152f",
+
+                  fontSize: 16,
+                  fontWeight: 600,
+
+                  "&:hover": {
+                    backgroundColor: "#10254b",
+                  },
+                }}
+              >
+                {loading
+                  ? "Creating Account..."
+                  : "Create Account"}
+              </Button>
+
+              {/* ================================================= */}
+              {/* LOGIN DIVIDER */}
+              {/* ================================================= */}
+
+              <Divider
+                sx={{
+                  my: 3,
+                }}
+              >
+                Already have an account?
+              </Divider>
+
+              {/* ================================================= */}
+              {/* LOGIN BUTTON */}
+              {/* ================================================= */}
+
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() =>
+                  navigate("/login")
+                }
+                sx={{
+                  py: 1.3,
+
+                  borderRadius: 2,
+
+                  borderColor: "#07152f",
+                  color: "#07152f",
+
+                  fontWeight: 600,
+
+                  "&:hover": {
+                    borderColor: "#07152f",
+                    backgroundColor: "#f2f5fa",
+                  },
+                }}
+              >
+                Login
+              </Button>
+
+              {/* ================================================= */}
+              {/* BACK TO HOME */}
+              {/* ================================================= */}
+
+              <Button
+                fullWidth
+                startIcon={<ArrowBack />}
+                onClick={() => navigate("/")}
+                sx={{
+                  mt: 1,
+                  color: "#526079",
+                }}
+              >
+                Back to Home
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Container>
+    </Box>
   );
 };
 

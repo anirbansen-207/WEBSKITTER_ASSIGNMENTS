@@ -3,6 +3,7 @@ import express from "express";
 import {
   getDriverOwnProfileController,
   getAssignedTripsController,
+  getTripPassengersController,
 } from "../controllers/driverController.js";
 
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -27,6 +28,14 @@ router.get(
   authMiddleware,
   roleMiddleware([ROLES.DRIVER]),
   getAssignedTripsController
+);
+
+// Get passengers of an assigned trip
+router.get(
+  "/trip/:tripId/passengers",
+  authMiddleware,
+  roleMiddleware([ROLES.DRIVER]),
+  getTripPassengersController
 );
 
 export default router;

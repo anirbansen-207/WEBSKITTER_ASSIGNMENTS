@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+
 import {
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  Alert,
   Box,
   Button,
   Card,
@@ -13,6 +19,7 @@ import {
 } from "@mui/material";
 
 import { createPayment } from "../../services/paymentService";
+
 import { createTicket } from "../../services/ticketService";
 
 const Payment = () => {
@@ -20,13 +27,27 @@ const Payment = () => {
   const navigate = useNavigate();
 
   // Booking received from SeatSelection page.
-  const booking = location.state?.booking;
+  const booking =
+    location.state?.booking;
 
   // Selected payment method.
-  const [paymentMethod, setPaymentMethod] = useState("UPI");
+  const [
+    paymentMethod,
+    setPaymentMethod,
+  ] = useState("UPI");
 
-  // Controls the button while payment/ticket is being processed.
-  const [loading, setLoading] = useState(false);
+  // Controls the button while
+  // payment/ticket is being processed.
+  const [loading, setLoading] =
+    useState(false);
+
+  // Payment/ticket error
+  const [error, setError] =
+    useState("");
+
+  // =========================================================
+  // NO BOOKING
+  // =========================================================
 
   if (!booking) {
     return (
@@ -38,7 +59,11 @@ const Payment = () => {
         <Button
           variant="contained"
           sx={{ mt: 2 }}
-          onClick={() => navigate("/customer/trips")}
+          onClick={() =>
+            navigate(
+              "/customer/trips",
+            )
+          }
         >
           Back to Trips
         </Button>
@@ -46,63 +71,131 @@ const Payment = () => {
     );
   }
 
-const handlePayment = async () => {
-  try {
-    setLoading(true);
+  // =========================================================
+  // HANDLE PAYMENT
+  // =========================================================
 
-    const paymentData = {
-      bookingId: booking._id,
-      paymentMethod,
-    };
-
-    console.log("Payment data:", paymentData);
-
+  const handlePayment = async () => {
     try {
-      // Try to create payment.
-      const payment = await createPayment(paymentData);
+      setLoading(true);
+      setError("");
 
-      console.log("Payment successful:", payment);
-    } catch (paymentError) {
-      // If payment already exists,
-      // we can continue to ticket generation.
-      const message = paymentError.response?.data?.message;
-
-      if (message !== "Payment already exists") {
-        throw paymentError;
-      }
+      const paymentData = {
+        bookingId: booking._id,
+        paymentMethod,
+      };
 
       console.log(
-        "Payment already exists. Proceeding to ticket generation.",
+        "Payment data:",
+        paymentData,
       );
-    }
 
-    // Payment either:
-    // 1. was just created successfully
-    // OR
-    // 2. already existed successfully.
-    //
-    // So now generate the ticket.
-    const ticket = await createTicket(booking._id);
+      try {
+        // Internal payment workflow
+        const payment =
+          await createPayment(
+            paymentData,
+          );
 
-    console.log("Ticket generated successfully:", ticket);
+        console.log(
+          "Payment successful:",
+          payment,
+        );
+      } catch (paymentError) {
+        // If payment already exists,
+        // continue to ticket generation.
+        const message =
+          paymentError?.response
+            ?.data?.message;
 
-    navigate("/customer/ticket", {
-      state: {
+        if (
+          message !==
+          "Payment already exists"
+        ) {
+          throw paymentError;
+        }
+
+        console.log(
+          "Payment already exists. Proceeding to ticket generation.",
+        );
+      }
+
+      // Payment either:
+      //
+      // 1. was just created successfully
+      //
+      // OR
+      //
+      // 2. already existed successfully.
+      //
+      // Now generate the ticket.
+
+      const ticket =
+        await createTicket(
+          booking._id,
+        );
+
+      console.log(
+        "Ticket generated successfully:",
         ticket,
-      },
-    });
-  } catch (error) {
-    console.error("Payment/Ticket failed:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+      );
+
+      // IMPORTANT:
+      // bookingId is included in the URL.
+      //
+      // If the customer refreshes the ticket page,
+      // Ticket.jsx can fetch the ticket again.
+      navigate(
+        `/customer/ticket?bookingId=${booking._id}`,
+        {
+          state: {
+            ticket,
+          },
+        },
+      );
+    } catch (error) {
+      console.error(
+        "Payment/Ticket failed:",
+        error,
+      );
+
+      setError(
+        error?.response?.data?.message ||
+          "Payment failed. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =========================================================
+  // UI
+  // =========================================================
 
   return (
-    <Box sx={{ maxWidth: 600 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box
+      sx={{
+        maxWidth: 600,
+      }}
+    >
+      <Typography
+        variant="h4"
+        gutterBottom
+      >
         Payment
       </Typography>
+
+      {/* Error */}
+      {error && (
+        <Alert
+          severity="error"
+          sx={{
+            mb: 2,
+          }}
+        >
+          {error}
+        </Alert>
+      )}
 
       <Card>
         <CardContent>
@@ -111,39 +204,59 @@ const handlePayment = async () => {
           </Typography>
 
           <Typography sx={{ mt: 2 }}>
-            Booking ID: {booking._id}
+            Booking ID:{" "}
+            {booking._id}
           </Typography>
 
           <Typography>
-            Seats: {booking.seatNumbers?.join(", ")}
+            Seats:{" "}
+            {booking.seatNumbers?.join(
+              ", ",
+            )}
           </Typography>
 
           <Typography>
-            Amount: ₹{booking.totalAmount}
+            Amount: ₹
+            {booking.totalAmount}
           </Typography>
 
-          <FormControl fullWidth sx={{ mt: 3 }}>
-            <InputLabel>Payment Method</InputLabel>
+          {/* Payment Method */}
+          <FormControl
+            fullWidth
+            sx={{ mt: 3 }}
+          >
+            <InputLabel>
+              Payment Method
+            </InputLabel>
 
             <Select
               value={paymentMethod}
               label="Payment Method"
               onChange={(event) =>
-                setPaymentMethod(event.target.value)
+                setPaymentMethod(
+                  event.target.value,
+                )
               }
             >
-              <MenuItem value="UPI">UPI</MenuItem>
+              <MenuItem value="UPI">
+                UPI
+              </MenuItem>
 
-              <MenuItem value="CARD">Card</MenuItem>
+              <MenuItem value="CARD">
+                Card
+              </MenuItem>
 
               <MenuItem value="NET_BANKING">
                 Net Banking
               </MenuItem>
 
-              <MenuItem value="CASH">Cash</MenuItem>
+              <MenuItem value="CASH">
+                Cash
+              </MenuItem>
             </Select>
           </FormControl>
 
+          {/* Pay */}
           <Button
             variant="contained"
             fullWidth

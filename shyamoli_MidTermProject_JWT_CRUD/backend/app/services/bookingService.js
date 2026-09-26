@@ -262,40 +262,36 @@ export const getSingleBookingService = async (
 
 
 // CANCEL BOOKING
-// Cancel booking service
 export const cancelBookingService = async ({
   bookingId,
   customerId,
 }) => {
   try {
-    // Build the booking search condition
+    // Build booking search condition
     const bookingQuery = {
       _id: bookingId,
     };
 
     // If customerId is provided,
-    // it means a customer is cancelling their own booking.
+    // customer is cancelling their own booking.
     //
     // If customerId is undefined,
-    // it means Booking Staff is cancelling
-    // the booking on behalf of the customer.
+    // Booking Staff is cancelling on behalf of customer.
     if (customerId) {
       bookingQuery.customerId = customerId;
     }
 
-    // Find the booking
+    // Find booking
     const booking = await Booking.findOne(
       bookingQuery,
     );
 
-    // Booking not found
     if (!booking) {
       const error = new Error(
         "Booking not found",
       );
 
       error.statusCode = 404;
-
       throw error;
     }
 
@@ -306,7 +302,6 @@ export const cancelBookingService = async ({
       );
 
       error.statusCode = 400;
-
       throw error;
     }
 
@@ -317,17 +312,27 @@ export const cancelBookingService = async ({
       );
 
       error.statusCode = 400;
-
       throw error;
     }
 
     // Update booking status
     booking.status = "CANCELLED";
 
-    // Save booking
     await booking.save();
 
-    // Return updated booking
+    // IMPORTANT:
+    // If a ticket was already generated for this booking,
+    // update its status as well.
+    await Ticket.findOneAndUpdate(
+      {
+        bookingId: booking._id,
+        ticketStatus: "ACTIVE",
+      },
+      {
+        ticketStatus: "CANCELLED",
+      },
+    );
+
     return booking;
   } catch (error) {
     console.error(

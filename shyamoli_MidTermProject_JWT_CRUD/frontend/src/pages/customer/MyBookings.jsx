@@ -22,9 +22,14 @@ import {
 
 const MyBookings = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
-  // Fetch all bookings of the logged-in customer
+  const queryClient =
+    useQueryClient();
+
+  // =========================================================
+  // FETCH CUSTOMER BOOKINGS
+  // =========================================================
+
   const {
     data: bookings,
     isLoading,
@@ -32,58 +37,111 @@ const MyBookings = () => {
     error,
   } = useQuery({
     queryKey: ["my-bookings"],
+
     queryFn: getOwnBookings,
   });
 
-  // Cancel booking mutation
-  const cancelMutation = useMutation({
-    mutationFn: cancelBooking,
+  // =========================================================
+  // CANCEL BOOKING
+  // =========================================================
 
-    onSuccess: () => {
-      // Fetch bookings again after cancellation
-      queryClient.invalidateQueries({
-        queryKey: ["my-bookings"],
-      });
-    },
+  const cancelMutation =
+    useMutation({
+      mutationFn: cancelBooking,
 
-    onError: (error) => {
-      console.error("Cancellation failed:", error);
-    },
-  });
+      onSuccess: () => {
+        // Fetch bookings again
+        // after cancellation.
+        queryClient.invalidateQueries(
+          {
+            queryKey: [
+              "my-bookings",
+            ],
+          },
+        );
+      },
 
-  // View ticket mutation
-  const ticketMutation = useMutation({
-    mutationFn: getTicket,
+      onError: (error) => {
+        console.error(
+          "Cancellation failed:",
+          error,
+        );
+      },
+    });
 
-    onSuccess: (ticket) => {
-      console.log("Ticket fetched successfully:", ticket);
+  // =========================================================
+  // VIEW TICKET
+  // =========================================================
 
-      // Send ticket data to Ticket page
-      navigate("/customer/ticket", {
-        state: {
+  const ticketMutation =
+    useMutation({
+      mutationFn: getTicket,
+
+      onSuccess: (
+        ticket,
+        bookingId,
+      ) => {
+        console.log(
+          "Ticket fetched successfully:",
           ticket,
-        },
-      });
-    },
+        );
 
-    onError: (error) => {
-      console.error("Failed to fetch ticket:", error);
-    },
-  });
+        // IMPORTANT:
+        //
+        // Include bookingId in URL so
+        // Ticket.jsx can recover the ticket
+        // after a browser refresh.
+        navigate(
+          `/customer/ticket?bookingId=${bookingId}`,
+          {
+            state: {
+              ticket,
+            },
+          },
+        );
+      },
+
+      onError: (error) => {
+        console.error(
+          "Failed to fetch ticket:",
+          error,
+        );
+      },
+    });
+
+  // =========================================================
+  // LOADING
+  // =========================================================
 
   if (isLoading) {
-    return <p>Loading your bookings...</p>;
-  }
-
-  if (isError) {
     return (
       <p>
-        Failed to load bookings: {error.message}
+        Loading your bookings...
       </p>
     );
   }
 
-  if (!bookings || bookings.length === 0) {
+  // =========================================================
+  // ERROR
+  // =========================================================
+
+  if (isError) {
+    return (
+      <p>
+        Failed to load bookings:{" "}
+        {error.message}
+      </p>
+    );
+  }
+
+  // =========================================================
+  // EMPTY
+  // =========================================================
+
+  if (
+    !bookings ||
+    bookings.length === 0
+  ) {
     return (
       <Box>
         <Typography variant="h4">
@@ -91,86 +149,173 @@ const MyBookings = () => {
         </Typography>
 
         <Typography sx={{ mt: 2 }}>
-          You don't have any bookings yet.
+          You don't have any
+          bookings yet.
         </Typography>
       </Box>
     );
   }
 
+  // =========================================================
+  // UI
+  // =========================================================
+
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
+      <Typography
+        variant="h4"
+        gutterBottom
+      >
         My Bookings
       </Typography>
 
       {bookings.map((booking) => (
-        <Card key={booking._id} sx={{ mb: 3 }}>
+        <Card
+          key={booking._id}
+          sx={{ mb: 3 }}
+        >
           <CardContent>
+            {/* Route */}
+
             <Typography variant="h6">
-              {booking.tripId?.routeId?.sourceCity}
+              {
+                booking.tripId
+                  ?.routeId
+                  ?.sourceCity
+              }
+
               {" → "}
-              {booking.tripId?.routeId?.destinationCity}
+
+              {
+                booking.tripId
+                  ?.routeId
+                  ?.destinationCity
+              }
             </Typography>
 
-            <Typography sx={{ mt: 2 }}>
-              <strong>Bus:</strong>{" "}
-              {booking.tripId?.busId?.busName}
+            {/* Bus */}
+
+            <Typography
+              sx={{ mt: 2 }}
+            >
+              <strong>
+                Bus:
+              </strong>{" "}
+              {
+                booking.tripId
+                  ?.busId
+                  ?.busName
+              }
             </Typography>
 
-            <Typography>
-              <strong>Bus Number:</strong>{" "}
-              {booking.tripId?.busId?.busNumber}
-            </Typography>
-
-            <Typography>
-              <strong>Seat(s):</strong>{" "}
-              {booking.seatNumbers?.join(", ")}
-            </Typography>
-
-            <Typography>
-              <strong>Travel Date:</strong>{" "}
-              {booking.tripId?.travelDate}
-            </Typography>
-
-            <Typography>
-              <strong>Departure:</strong>{" "}
-              {booking.tripId?.departureTime}
-            </Typography>
+            {/* Bus Number */}
 
             <Typography>
-              <strong>Amount:</strong>{" "}
-              ₹{booking.totalAmount}
+              <strong>
+                Bus Number:
+              </strong>{" "}
+              {
+                booking.tripId
+                  ?.busId
+                  ?.busNumber
+              }
             </Typography>
+
+            {/* Seats */}
+
+            <Typography>
+              <strong>
+                Seat(s):
+              </strong>{" "}
+              {booking.seatNumbers?.join(
+                ", ",
+              )}
+            </Typography>
+
+            {/* Travel Date */}
+
+            <Typography>
+              <strong>
+                Travel Date:
+              </strong>{" "}
+              {
+                booking.tripId
+                  ?.travelDate
+              }
+            </Typography>
+
+            {/* Departure */}
+
+            <Typography>
+              <strong>
+                Departure:
+              </strong>{" "}
+              {
+                booking.tripId
+                  ?.departureTime
+              }
+            </Typography>
+
+            {/* Amount */}
+
+            <Typography>
+              <strong>
+                Amount:
+              </strong>{" "}
+              ₹
+              {booking.totalAmount}
+            </Typography>
+
+            {/* Status */}
 
             <Typography sx={{ mt: 1 }}>
-              <strong>Status:</strong>{" "}
+              <strong>
+                Status:
+              </strong>{" "}
               {booking.status}
             </Typography>
 
-            {/* View Ticket button */}
+            {/* ================= VIEW TICKET ================= */}
+
             <Button
               variant="contained"
-              sx={{ mt: 2, mr: 2 }}
-              onClick={() => ticketMutation.mutate(booking._id)}
-              disabled={ticketMutation.isPending}
+              sx={{
+                mt: 2,
+                mr: 2,
+              }}
+              onClick={() =>
+                ticketMutation.mutate(
+                  booking._id,
+                )
+              }
+              disabled={
+                ticketMutation.isPending
+              }
             >
               {ticketMutation.isPending
                 ? "Loading Ticket..."
                 : "View Ticket"}
             </Button>
 
-            {/* Cancel Booking button */}
+            {/* ================= CANCEL ================= */}
+
             <Button
               variant="contained"
               color="error"
               sx={{ mt: 2 }}
-              onClick={() => cancelMutation.mutate(booking._id)}
+              onClick={() =>
+                cancelMutation.mutate(
+                  booking._id,
+                )
+              }
               disabled={
                 cancelMutation.isPending ||
-                booking.status === "CANCELLED"
+                booking.status ===
+                  "CANCELLED"
               }
             >
-              {booking.status === "CANCELLED"
+              {booking.status ===
+              "CANCELLED"
                 ? "Booking Cancelled"
                 : cancelMutation.isPending
                   ? "Cancelling..."

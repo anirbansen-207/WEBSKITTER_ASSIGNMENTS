@@ -1,12 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAllTrips } from "../../services/tripService";
 import { useNavigate } from "react-router-dom";
+
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  Typography,
+  Chip,
+  CircularProgress,
+} from "@mui/material";
+
+import { getAllTrips } from "../../services/tripService";
 
 const CustomerTrips = () => {
   const navigate = useNavigate();
 
   const {
-    data: trips,
+    data: trips = [],
     isLoading,
     isError,
     error,
@@ -16,41 +28,172 @@ const CustomerTrips = () => {
   });
 
   if (isLoading) {
-    return <p>Loading trips...</p>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mt: 5,
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (isError) {
-    return <p>Failed to load trips: {error.message}</p>;
+    return (
+      <Typography color="error">
+        Failed to load trips: {error.message}
+      </Typography>
+    );
   }
 
   return (
-    <div>
-      <h1>Available Trips</h1>
+    <Box>
+      {/* ================= HEADER ================= */}
 
-      {trips?.length === 0 ? (
-        <p>No trips available.</p>
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 600,
+          mb: 1,
+        }}
+      >
+        Book Your Ticket
+      </Typography>
+
+      <Typography
+        color="text.secondary"
+        sx={{
+          mb: 4,
+        }}
+      >
+        Select a trip and choose your seats.
+      </Typography>
+
+      {/* ================= TRIPS ================= */}
+
+      {trips.length === 0 ? (
+        <Typography color="text.secondary">
+          No trips available.
+        </Typography>
       ) : (
-        trips?.map((trip) => (
-          <div key={trip._id}>
-            <h3>{trip.busId?.busName}</h3>
+        <Grid container spacing={3}>
+          {trips.map((trip) => (
+            <Grid
+              item
+              xs={12}
+              md={6}
+              lg={4}
+              key={trip._id}
+            >
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 2,
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  {/* Bus */}
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    gutterBottom
+                  >
+                    {trip.busId?.busName || "Bus"}
+                  </Typography>
 
-            <p>From: {trip.routeId?.sourceCity}</p>
+                  <Typography
+                    color="text.secondary"
+                    sx={{
+                      mb: 2,
+                    }}
+                  >
+                    Bus Number:{" "}
+                    {trip.busId?.busNumber || "-"}
+                  </Typography>
 
-            <p>To: {trip.routeId?.destinationCity}</p>
+                  {/* Route */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                    }}
+                  >
+                    {trip.routeId?.sourceCity || "-"}{" "}
+                    →{" "}
+                    {trip.routeId?.destinationCity || "-"}
+                  </Typography>
 
-            <p>Travel Date: {trip.travelDate}</p>
+                  {/* Travel Date */}
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Travel Date:</strong>{" "}
+                    {trip.travelDate
+                      ? new Date(
+                          trip.travelDate
+                        ).toLocaleDateString()
+                      : "-"}
+                  </Typography>
 
-            <p>Departure: {trip.departureTime}</p>
+                  {/* Departure */}
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Departure:</strong>{" "}
+                    {trip.departureTime
+                      ? new Date(
+                          trip.departureTime
+                        ).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "-"}
+                  </Typography>
 
-            <button onClick={() => navigate(`/customer/trips/${trip._id}`)}>
-              View Trip
-            </button>
+                  {/* Arrival */}
+                  <Typography sx={{ mb: 2 }}>
+                    <strong>Arrival:</strong>{" "}
+                    {trip.arrivalTime
+                      ? new Date(
+                          trip.arrivalTime
+                        ).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "-"}
+                  </Typography>
 
-            <hr />
-          </div>
-        ))
+                  {/* Status */}
+                  <Chip
+                    label={
+                      trip.tripStatus || "SCHEDULED"
+                    }
+                    size="small"
+                    sx={{
+                      mb: 3,
+                    }}
+                  />
+
+                  {/* View Trip / Book */}
+                  <Box>
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      onClick={() =>
+                        navigate(
+                          `/customer/trips/${trip._id}`
+                        )
+                      }
+                    >
+                      VIEW & BOOK
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       )}
-    </div>
+    </Box>
   );
 };
 

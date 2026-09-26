@@ -46,3 +46,30 @@ export const deleteDriver = async (driverId) => {
 
   return response.data.data;
 };
+
+// Get logged-in driver's profile
+export const getMyDriverProfile = async () => {
+  const response = await axiosInstance.get(
+    "/api/driver/my_profile"
+  );
+
+  return response.data.data;
+};
+
+// Get trips assigned to logged-in driver
+export const getMyAssignedTrips = async () => {
+  const response = await axiosInstance.get(
+    "/api/driver/assigned_trips"
+  );
+
+  return response.data.data;
+};
+
+// Get passengers of an assigned trip
+export const getTripPassengers = async (tripId) => {
+  const response = await axiosInstance.get(
+    `/api/driver/trip/${tripId}/passengers`
+  );
+
+  return response.data.data;
+};

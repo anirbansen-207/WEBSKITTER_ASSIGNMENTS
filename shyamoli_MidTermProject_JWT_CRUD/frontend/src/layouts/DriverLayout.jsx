@@ -16,7 +16,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 import { useAuth } from "../context/AuthContext";
 
-const SuperAdminLayout = () => {
+const DriverLayout = () => {
   const navigate = useNavigate();
 
   const { user, logout } = useAuth();
@@ -56,36 +56,8 @@ const SuperAdminLayout = () => {
 
   const serviceItems = [
     {
-      label: "Routes",
-      path: "/super-admin/routes",
-    },
-    {
-      label: "Buses",
-      path: "/super-admin/buses",
-    },
-    {
-      label: "Seat Layouts",
-      path: "/super-admin/seat-layouts",
-    },
-    {
-      label: "Drivers",
-      path: "/super-admin/drivers",
-    },
-    {
-      label: "Booking Staff",
-      path: "/super-admin/booking-staff",
-    },
-    {
-      label: "Customers",
-      path: "/super-admin/customers",
-    },
-    {
-      label: "Trips",
-      path: "/super-admin/trips",
-    },
-    {
-      label: "Bookings",
-      path: "/super-admin/bookings",
+      label: "Assigned Trips",
+      path: "/driver",
     },
   ];
 
@@ -146,7 +118,6 @@ const SuperAdminLayout = () => {
                 py: 1.2,
                 borderRadius: 1,
                 cursor: "pointer",
-                fontSize: 16,
 
                 "&:hover": {
                   backgroundColor:
@@ -166,7 +137,6 @@ const SuperAdminLayout = () => {
                 py: 1.2,
                 borderRadius: 1,
                 cursor: "pointer",
-                fontSize: 16,
 
                 "&:hover": {
                   backgroundColor:
@@ -189,7 +159,6 @@ const SuperAdminLayout = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
-                fontSize: 16,
 
                 "&:hover": {
                   backgroundColor:
@@ -261,7 +230,7 @@ const SuperAdminLayout = () => {
                   fontWeight={700}
                   fontSize={16}
                 >
-                  {user?.name || "Super Admin"}
+                  {user?.name || "Driver"}
                 </Typography>
 
                 <Typography
@@ -270,7 +239,7 @@ const SuperAdminLayout = () => {
                     color: "#aab5c8",
                   }}
                 >
-                  (Super Admin)
+                  (Driver)
                 </Typography>
               </Box>
 
@@ -322,4 +291,4 @@ const SuperAdminLayout = () => {
   );
 };
 
-export default SuperAdminLayout;
+export default DriverLayout;

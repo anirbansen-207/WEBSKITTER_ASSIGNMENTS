@@ -10,6 +10,7 @@ import ProtectedRoute from "../routes/ProtectedRoute";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import VerifyOtp from "../pages/auth/VerifyOtp";
+import About from "../pages/auth/About";
 
 // Role based routes
 import RoleRoute from "../routes/RoleRoute";
@@ -25,8 +26,9 @@ import SuperAdminDashboard from "../pages/superAdmin/SuperAdminDashboard";
 import CustomerLayout from "../layouts/CustomerLayout";
 import SuperAdminLayout from "../layouts/SuperAdminLayout";
 import BookingStaffLayout from "../layouts/BookingStaffLayout";
-
+import DriverLayout from "../layouts/DriverLayout";
 // Pages
+import Home from "../pages/Home";
 import CustomerTrips from "../pages/customer/CustomerTrips";
 import TripDetails from "../pages/customer/TripDetails";
 import SeatSelection from "../pages/customer/SeatSelection";
@@ -59,32 +61,30 @@ import CreateOfflineBooking from "../pages/bookingStaff/CreateOfflineBooking";
 import BookingsDetails from "../pages/bookingStaff/BookingsDetails";
 import PrintTicket from "../pages/bookingStaff/PrintTicket";
 
-
-
 const router = createBrowserRouter([
   // Public routes
   {
-    // PublicLayout will be displayed for public pages.
-    path: "/",
     element: <PublicLayout />,
-
-    // Pages inside this layout will be rendered
-    // through the <Outlet /> of PublicLayout.
     children: [
       {
-        // /login
+        index: true,
+        element: <Home />,
+      },
+      {
         path: "login",
         element: <Login />,
       },
       {
-        // /register
         path: "register",
         element: <Register />,
       },
       {
-        // /verify-otp
         path: "verify-otp",
         element: <VerifyOtp />,
+      },
+      {
+        path: "about",
+        element: <About />,
       },
     ],
   },
@@ -176,7 +176,13 @@ const router = createBrowserRouter([
         children: [
           {
             path: "/driver",
-            element: <DriverDashboard />,
+            element: <DriverLayout />,
+            children: [
+              {
+                index: true,
+                element: <DriverDashboard />,
+              },
+            ],
           },
         ],
       },
